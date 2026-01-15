@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $name_slug
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property string $image_path
  * 
  * @property Collection|Recipe[] $recipes
  *
@@ -29,7 +30,8 @@ class Ingredient extends Model
 
 	protected $fillable = [
 		'name',
-		'name_slug'
+		'name_slug',
+		'image_path'
 	];
 
 	public function recipes()
