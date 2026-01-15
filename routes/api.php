@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Users\Recipes\RecipeController;
+use App\Http\Controllers\Api\V1\Config\ConfigController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -16,5 +18,5 @@ use App\Http\Controllers\Api\V1\Users\Recipes\RecipeController;
 Route::group(['middleware' => ['api']], function () {
     
     Route::apiResource('recipes', RecipeController::class);
-
+    Route::apiResource('config',ConfigController::class );
 });
