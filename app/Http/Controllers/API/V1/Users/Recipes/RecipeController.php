@@ -9,7 +9,6 @@ class RecipeController extends BaseCRUDController
 {
     protected function setModel(){
         $this->model=Recipe::class;
-
     }
     protected function rules($id = null)
     {
