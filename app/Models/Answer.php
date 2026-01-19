@@ -46,7 +46,7 @@ class Answer extends Model
 		'parent_id',
 		'status'
 	];
-
+	//Answer cha
 	public function answer()
 	{
 		return $this->belongsTo(Answer::class, 'parent_id');
@@ -61,9 +61,15 @@ class Answer extends Model
 	{
 		return $this->belongsTo(User::class);
 	}
-
+	//Answer con
 	public function answers()
 	{
 		return $this->hasMany(Answer::class, 'parent_id');
 	}
+	//Answer đệ quy
+	public function answersRecursive()
+    {
+        return $this->hasMany(Answer::class, 'parent_id')
+                    ->with('answersRecursive', 'user');
+    }
 }

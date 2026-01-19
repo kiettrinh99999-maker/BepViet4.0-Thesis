@@ -20,8 +20,10 @@ use App\Http\Controllers\Api\V1\Users\Forums\AnswerController;
 Route::group(['middleware' => ['api']], function () {
     Route::apiResource('recipes', RecipeController::class);
     Route::apiResource('config', ConfigController::class);
-    //Quy: api cho question
+    //API cho question
     Route::apiResource('questions', QuestionController::class);
-    //Quy: api cho answer
+    //API cho answer
     Route::apiResource('answers', AnswerController::class);
+    //API lấy answer theo question id
+    Route::get('questions/{id}/answers', [AnswerController::class, 'listByQuestionId']);
 });
