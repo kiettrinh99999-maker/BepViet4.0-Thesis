@@ -26,8 +26,18 @@ class QuestionController extends BaseCRUDController
     }
 
     public function index(){
-        //Truy vấn tới bảng questions, nối với bảng users đế lấy username và lấy tổng số answer của 1 question
+        // Lấy danh sách question mới nhất, kèm thông tin người tạo và số lượng câu trả lời (phân trang)
         $data = $this->model::with('user')->withCount('answers')->latest()->paginate(10);
         return $this->sendResponse($data, 'Lấy danh sách câu hỏi thành công');
+    }
+
+    public function show($id)
+    {
+        // Lấy chi tiết câu hỏi theo ID, kèm người tạo và tổng số câu trả lời
+        $item = $this->model::with('user')->withCount('answers')->find($id);
+        if (is_null($item)) {
+            return $this->sendError('Không tìm thấy dữ liệu.');
+        }
+        return $this->sendResponse($item, 'Lấy chi tiết thành công.');
     }
 }
