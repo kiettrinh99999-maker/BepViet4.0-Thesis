@@ -1,10 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Admins\DashboardController;
+use App\Http\Controllers\Api\V1\Admins\Config\ConfigController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Users\Recipes\RecipeController;
-use App\Http\Controllers\Api\V1\Config\ConfigController;
 use App\Http\Controllers\Api\V1\Users\Forums\QuestionController;
 use App\Http\Controllers\Api\V1\Users\Forums\AnswerController;
 
