@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admins\DashboardController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Users\Recipes\RecipeController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Api\V1\Users\Forums\AnswerController;
 |
 */
 Route::group(['middleware' => ['api']], function () {
+    Route::get('admin/dashboard', [DashboardController::class, 'index']);
     Route::apiResource('recipes', RecipeController::class);
     Route::apiResource('config', ConfigController::class);
     //API cho question
