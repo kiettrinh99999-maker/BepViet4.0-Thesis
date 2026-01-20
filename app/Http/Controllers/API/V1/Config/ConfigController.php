@@ -15,4 +15,13 @@ class ConfigController extends BaseCRUDController
         return [
         ];
     }
+    public function getSettingWebActive()
+    {
+        // Lấy chi tiết câu hỏi theo ID, kèm người tạo và tổng số câu trả lời
+        $item = $this->model::where('status', 'active')->first();
+        if (is_null($item)) {
+            return $this->sendError('Không tìm thấy dữ liệu.');
+        }
+        return $this->sendResponse($item, 'Lấy setting web thành công.');
+    }
 }
