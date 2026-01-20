@@ -16,11 +16,9 @@ class AnswerController extends BaseCRUDController
     protected function rules($id = null)
     {
         return [
-           'content'   => 'required|string',
+            'content'     => 'required|string',
             'question_id' => 'required|integer|exists:questions,id',
-            'parent_id' => 'nullable|integer|exists:answers,id',
-            'user_id'   => 'required|integer|exists:users,id',
-            'status'    => 'required|in:active,inactive'
+            'parent_id'   => 'nullable|integer|exists:answers,id',
         ];
     }
     public function listByQuestionId($id)
@@ -36,5 +34,27 @@ class AnswerController extends BaseCRUDController
         ->get();
 
         return $this->sendResponse($data, 'Lấy danh sách câu trả lời thành công');
+    }
+
+    public function store(Request $request)
+    {
+        //Kiểm tra dữ liệu đầu vào với rule
+        $validator = \Validator::make($request->all(), $this->rules());
+
+        if ($validator->fails()) {
+            return $this->sendError('Lỗi dữ liệu đầu vào', $validator->errors(), 422);
+        }
+
+        //Tạo item Answer
+        $answer = Answer::create([
+            'content'     => $request->content,
+            'question_id' => $request->question_id,
+            'parent_id'   => $request->parent_id, // null nếu là trả lời gốc
+            //'user_id'     => auth()->id(),
+            'user_id' => 1, // user test
+            'status'      => 'active',
+        ]);
+
+        return $this->sendResponse($answer, 'Gửi câu trả lời thành công', 201);
     }
 }
