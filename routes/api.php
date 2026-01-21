@@ -1,17 +1,12 @@
 <?php
-
 use App\Http\Controllers\Api\V1\Admins\DashboardController;
-<<<<<<< Updated upstream
 use App\Http\Controllers\Api\V1\Admins\Config\ConfigController;
-=======
 use App\Http\Controllers\Api\V1\Admins\ReportController;
->>>>>>> Stashed changes
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Users\Recipes\RecipeController;
 use App\Http\Controllers\Api\V1\Users\Forums\QuestionController;
 use App\Http\Controllers\Api\V1\Users\Forums\AnswerController;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -29,18 +24,16 @@ Route::group(['middleware' => ['api']], function () {
 
     //admin/report
     // Đưa 'index' vào trong mảng
-Route::get('admin/report', [ReportController::class, 'index']);
+    Route::get('admin/report', [ReportController::class, 'index']);
 
 
     //member và user
     Route::apiResource('recipes', RecipeController::class);
-    Route::apiResource('config', ConfigController::class);
+    Route::apiResource('config',  ConfigController::class);
     //API cho question
     Route::apiResource('questions', QuestionController::class);
     //API cho answer
     Route::apiResource('answers', AnswerController::class);
     //API lấy answer theo question id
     Route::get('questions/{id}/answers', [AnswerController::class, 'listByQuestionId']);
-    //API lấy setting web active
-    Route::get('config-active', [ConfigController::class, 'getSettingWebActive']);
 });
