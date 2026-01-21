@@ -33,7 +33,7 @@ class ConfigController extends BaseCRUDController
         }
 
         // Validate dữ liệu
-        $validator = \Validator::make($request->all(), $this->rules($id));
+        $validator = Validator::make($request->all(), $this->rules($id));
         if ($validator->fails()) {
             return $this->sendError('Lỗi dữ liệu đầu vào', $validator->errors(), 422);
         }
@@ -69,5 +69,18 @@ class ConfigController extends BaseCRUDController
         $settings->update($data);
 
         return $this->sendResponse($settings, 'Cập nhật cấu hình thành công.');
+    }
+    public function  (){
+        // Lấy id và name của 3 bảng
+        $regions = Region::select('id', 'name')->get();
+        $difficulties = Difficulty::select('id', 'name')->get();
+        $events = Event::select('id', 'name')->get();
+
+        $data = [
+            'regions' => $regions,
+            'difficulties' => $difficulties,
+            'events' => $events
+        ];
+        return $this->sendResponse($data, 'Lấy dữ liệu bộ lọc thành công');
     }
 }
