@@ -70,7 +70,7 @@ class ConfigController extends BaseCRUDController
 
         return $this->sendResponse($settings, 'Cập nhật cấu hình thành công.');
     }
-    public function  (){
+    public function get_region_event_dif(){
         // Lấy id và name của 3 bảng
         $regions = Region::select('id', 'name')->get();
         $difficulties = Difficulty::select('id', 'name')->get();
