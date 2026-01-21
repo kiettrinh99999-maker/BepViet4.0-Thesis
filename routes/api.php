@@ -29,6 +29,8 @@ Route::group(['middleware' => ['api']], function () {
     //member và user
     Route::apiResource('recipes', RecipeController::class);
     Route::apiResource('config',  ConfigController::class);
+    //Lấy dữ liệu vùng miền, độ khó
+    Route::get('get-event-region',[ConfigController::class,'get_region_event_dif']);
     //API cho question
     Route::apiResource('questions', QuestionController::class);
     //API cho answer
