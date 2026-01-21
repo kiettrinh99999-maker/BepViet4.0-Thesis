@@ -1,7 +1,11 @@
 <?php
 
 use App\Http\Controllers\Api\V1\Admins\DashboardController;
+<<<<<<< Updated upstream
 use App\Http\Controllers\Api\V1\Admins\Config\ConfigController;
+=======
+use App\Http\Controllers\Api\V1\Admins\ReportController;
+>>>>>>> Stashed changes
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Users\Recipes\RecipeController;
@@ -19,7 +23,16 @@ use App\Http\Controllers\Api\V1\Users\Forums\AnswerController;
 |
 */
 Route::group(['middleware' => ['api']], function () {
+    //admin/dashboard
     Route::get('admin/dashboard', [DashboardController::class, 'index']);
+
+
+    //admin/report
+    // Đưa 'index' vào trong mảng
+Route::get('admin/report', [ReportController::class, 'index']);
+
+
+    //member và user
     Route::apiResource('recipes', RecipeController::class);
     Route::apiResource('config', ConfigController::class);
     //API cho question

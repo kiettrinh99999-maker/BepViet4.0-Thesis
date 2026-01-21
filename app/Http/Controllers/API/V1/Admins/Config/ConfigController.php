@@ -25,7 +25,6 @@ class ConfigController extends BaseCRUDController
         ];
     }
 
-    // Ghi đè hàm update để xử lý upload ảnh
     public function update(Request $request, $id)
     {
         $settings = $this->model::find($id);
@@ -40,8 +39,6 @@ class ConfigController extends BaseCRUDController
         }
 
         $data = $request->except('image'); // Lấy hết data trừ file ảnh
-
-        // Xử lý upload ảnh nếu có
         if ($request->hasFile('image')) {
             // 1. Xóa ảnh cũ nếu có (và không phải ảnh mặc định)
             if ($settings->image_path) {
