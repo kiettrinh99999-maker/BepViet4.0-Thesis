@@ -24,8 +24,7 @@ Route::group(['middleware' => ['api']], function () {
 
     //admin/report
     // Đưa 'index' vào trong mảng
-    Route::get('admin/report', [ReportController::class, 'index']);
-
+    Route::apiResource('admin/report', ReportController::class);
 
     //member và user
     Route::apiResource('recipes', RecipeController::class);

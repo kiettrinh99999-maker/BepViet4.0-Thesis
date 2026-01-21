@@ -12,8 +12,10 @@ class ReportController extends BaseCRUDController
         $this->model = RecipeReport::class; 
     }
 
-    protected function rules($id = null) { 
-        return []; 
+    protected function rules($id = null) {
+        return [
+        'status' => 'sometimes|in:pending,reviewed,dismissed',
+        ];
     }
 
     public function index()
