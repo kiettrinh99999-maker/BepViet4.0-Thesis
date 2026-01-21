@@ -18,4 +18,18 @@ class RecipeController extends BaseCRUDController
             // ... thêm rule khác
         ];
     }
+
+    public function index(){
+        // Lấy danh sách công thức mới nhất kèm id và name của các bảng liên quan
+        $data = Recipe::with([
+            'user:id,username,created_at',
+            'region:id,name',
+            'difficulty:id,name',
+            'event:id,name',
+            'recipe_category:id,name'
+        ])
+        ->latest()
+        ->paginate(10);
+        return $this->sendResponse($data, 'Lấy danh sách công thức thành công');
+    }
 }

@@ -28,4 +28,6 @@ Route::group(['middleware' => ['api']], function () {
     Route::apiResource('answers', AnswerController::class);
     //API lấy answer theo question id
     Route::get('questions/{id}/answers', [AnswerController::class, 'listByQuestionId']);
+    //API lấy setting web active
+    Route::get('config-active', [ConfigController::class, 'getSettingWebActive']);
 });
