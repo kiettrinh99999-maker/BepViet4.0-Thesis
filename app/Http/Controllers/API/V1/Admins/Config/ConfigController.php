@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\Region;
 use App\Models\Difficulty;
 use App\Models\Event;
-
+use App\Models\RecipeCategory;
 class ConfigController extends BaseCRUDController
 {
     protected function setModel()
@@ -76,11 +76,12 @@ class ConfigController extends BaseCRUDController
         $regions = Region::select('id', 'name')->get();
         $difficulties = Difficulty::select('id', 'name')->get();
         $events = Event::select('id', 'name')->get();
-
+        $recipe_category=RecipeCategory::select('id', 'name')->get();
         $data = [
             'regions' => $regions,
             'difficulties' => $difficulties,
-            'events' => $events
+            'events' => $events,
+            'recipe_category'=>$recipe_category
         ];
         return $this->sendResponse($data, 'Lấy dữ liệu bộ lọc thành công');
     }

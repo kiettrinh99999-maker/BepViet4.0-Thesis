@@ -38,6 +38,7 @@ class RecipeIngredient extends Model
 		'recipe_id',
 		'ingredient_id',
 		'quantity',
+		'image_path',
 		'unit'
 	];
 

@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Users\Recipes\RecipeController;
 use App\Http\Controllers\Api\V1\Users\Forums\QuestionController;
 use App\Http\Controllers\Api\V1\Users\Forums\AnswerController;
+use App\Http\Controllers\API\V1\Users\Follow\FollowController;
+use App\Http\Controllers\API\V1\Users\Ingreient\IngredientController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -37,4 +40,11 @@ Route::group(['middleware' => ['api']], function () {
     Route::apiResource('answers', AnswerController::class);
     //API lấy answer theo question id
     Route::get('questions/{id}/answers', [AnswerController::class, 'listByQuestionId']);
+
+    //APi follow
+    Route::post('toggle-follow', [FollowController::class, 'toggleFollow']);
+
+    //API nguyên liệu
+    Route::apiResource('ingredient', IngredientController::class);
+
 });
