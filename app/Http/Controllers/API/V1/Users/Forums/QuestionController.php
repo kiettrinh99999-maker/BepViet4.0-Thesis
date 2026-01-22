@@ -47,14 +47,23 @@ class QuestionController extends BaseCRUDController
             return $this->sendError('Lỗi dữ liệu đầu vào', $validator->errors(), 422);
         }
 
+        // Xử lý upload ảnh
+        // Lưu file vào thư mục:storage/app/public/uploads/question
+        // Disk 'public' tương ứng với storage/app/public
+        // Laravel tự sinh tên file ngẫu nhiên để tránh trùng
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('uploads/question', 'public');
+            $imagePath = '/' . ltrim($path, '/');
+        }
+
         // Tạo item Question
         $item = Question::create([
             'title'       => $request->title,
             'title_slug'  => Str::slug($request->title), //chuyển chuỗi title sang dạng slug
             'description' => $request->description,
-            'image_path'  => $request->image_path,
-            //'user_id'     => auth()->id(),
-            'user_id' => 1, // user test
+            'image_path'  => $imagePath,
+            'user_id' => auth()->id() ?? 1,
             'status'      => 'active',
         ]);
 

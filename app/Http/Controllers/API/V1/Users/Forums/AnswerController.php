@@ -50,8 +50,7 @@ class AnswerController extends BaseCRUDController
             'content'     => $request->content,
             'question_id' => $request->question_id,
             'parent_id'   => $request->parent_id, // null nếu là trả lời gốc
-            //'user_id'     => auth()->id(),
-            'user_id' => 1, // user test
+            'user_id' => auth()->id() ?? 1,
             'status'      => 'active',
         ]);
 
