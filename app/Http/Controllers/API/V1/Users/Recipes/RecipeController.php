@@ -74,6 +74,13 @@ class RecipeController extends BaseCRUDController
         if ($request->filled('difficulty_id')) {
             $query->where('difficulty_id', $request->difficulty_id);
         }
+        if ($request->filled('keyword')) {
+        $keyword = $request->keyword;
+        $query->where(function($q) use ($keyword) {
+            $q->where('title', 'like', '%' . $keyword . '%')
+              ->orWhere('title_slug', 'like', '%' . $keyword . '%');
+        });
+    }
         if ($request->filled('min_time')) {
             $query->where('cooking_time', '>=', $request->min_time);
         }
@@ -100,8 +107,6 @@ class RecipeController extends BaseCRUDController
             'event:id,name',
         ])
         ->where('status', 'pending');
-
-        
         if ($request->filled('region_id')) {
             $query->where('region_id', $request->region_id);
         }
