@@ -58,7 +58,12 @@ class RecipeController extends BaseCRUDController
         ])
         ->where('status', 'active')
         ->withAvg('rates', 'score')
-        ->withCount('rates');
+        ->withCount('rates')
+        ->where(function($q) {
+            $q->whereDoesntHave('recipe_reports', function($subQuery) {
+                $subQuery->where('status', 'reviewed');
+            });
+        });
         
         if ($request->filled('region_id')) {
             $query->where('region_id', $request->region_id);
@@ -69,16 +74,12 @@ class RecipeController extends BaseCRUDController
         if ($request->filled('difficulty_id')) {
             $query->where('difficulty_id', $request->difficulty_id);
         }
-        
-        // Lọc theo thời gian nấu
         if ($request->filled('min_time')) {
             $query->where('cooking_time', '>=', $request->min_time);
         }
         if ($request->filled('max_time')) {
             $query->where('cooking_time', '<=', $request->max_time);
         }
-        
-        // Sắp xếp theo vùng miền của user nếu có
         if ($request->filled('mock_user_region') && !$request->filled('region_id')) {
             $query->orderByRaw('CASE WHEN region_id = ? THEN 0 ELSE 1 END', [$request->mock_user_region]);
         }

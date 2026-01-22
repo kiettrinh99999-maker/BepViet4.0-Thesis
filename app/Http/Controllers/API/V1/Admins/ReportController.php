@@ -36,5 +36,21 @@ class ReportController extends BaseCRUDController
         $data = $query->orderBy('created_at', 'desc')->paginate(10);
         return $this->sendResponse($data, 'Lấy danh sách thành công');
     }
+
+    public function show($id)
+    {
+        $report = RecipeReport::with([
+            'recipe.user.profile',
+            'recipe.difficulty',
+            'recipe.event',
+            'recipe.ingredients',
+            'recipe.steps',
+            'recipe.steps.step_images',
+            'recipe.region',
+            'user.profile',
+        ])->findOrFail($id);
+
+        return $this->sendResponse($report, 'Lấy chi tiết báo cáo thành công');
+    }
     
 }
