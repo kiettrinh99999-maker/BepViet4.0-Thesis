@@ -49,7 +49,7 @@ class AuthController extends BaseCRUDController
             'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'user',
+            'role' => 'member',
             'status' => 'active',
         ]);
         $profile = new Profile();
