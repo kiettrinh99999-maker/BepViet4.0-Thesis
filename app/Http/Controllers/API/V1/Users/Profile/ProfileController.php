@@ -83,7 +83,6 @@ class ProfileController extends Controller
         
         $collectionsList = Collection::where('user_id', $user->id)
             ->withCount(['recipes' => function ($query) {
-                // Thay vì wherePivot, hãy dùng where + tên bảng trung gian
                 $query->where('recipe_collections.status', 'active');
             }])
             ->where('status', 'active') 
@@ -109,15 +108,14 @@ class ProfileController extends Controller
     /**
      * Cập nhật hồ sơ (Giữ nguyên logic cũ của bạn)
      */
-public function update(Request $request)
-    {
+    public function update(Request $request)
+    {   
             $user = $request->user();
 
             if (!$user) {
                 return response()->json(['success' => false, 'message' => 'User not found or Unauthorized'], 401);
             }
 
-            // 2. Validate dữ liệu
             $validator = Validator::make($request->all(), [
                 'name'   => 'required|string|max:255',
                 'phone'  => 'nullable|string|max:20',
@@ -132,21 +130,17 @@ public function update(Request $request)
                 ], 422);
             }
 
-            // 3. Xử lý Profile (Tạo mới nếu chưa có)
            $profile = $user->profile()->firstOrCreate(
             ['user_id' => $user->id],
-            ['name' => $user->name ?? 'User'] // Giá trị mặc định khi tạo mới
+            ['name' => $user->name ?? 'User'] 
         );
 
-            // 4. Cập nhật thông tin
             if ($request->has('name')) $profile->name = $request->name;
             if ($request->has('phone')) $profile->phone = $request->phone;
 
-            // 5. Xử lý Upload Avatar
             if ($request->hasFile('avatar')) {
                 $file = $request->file('avatar');
                 
-                // Xóa ảnh cũ nếu tồn tại
                 if ($profile->image_path) {
                     $oldPath = str_replace('/storage/', '', $profile->image_path);
                     if (Storage::disk('public')->exists($oldPath)) {
@@ -154,17 +148,14 @@ public function update(Request $request)
                     }
                 }
 
-                // Lưu ảnh mới
                 $filename = 'avatar_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
                 $path = $file->storeAs('uploads/avatars', $filename, 'public');
                 
-                // Lưu đường dẫn (kiểm tra xem frontend cần có /storage/ hay không)
                 $profile->image_path = 'uploads/avatars/' . $filename;
             }
 
             $profile->save();
 
-            // 6. Trả về kết quả
             return response()->json([
                 'success' => true,
                 'message' => 'Cập nhật thành công',
@@ -174,7 +165,52 @@ public function update(Request $request)
                     'avatar' => $profile->image_path,
                 ]
             ]);
+    }
+    /**
+     * Xóa công thức (soft delete)
+     */
+   public function destroyRecipe(Request $request, $id)
+    {
+        $user = $request->user();
 
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Vui lòng đăng nhập'], 401);
+        }
+
+        $recipe = Recipe::find($id);
+
+        if (!$recipe) {
+            return response()->json(['success' => false, 'message' => 'Không tìm thấy công thức'], 404);
+        }
+        if ($recipe->user_id !== $user->id) {
+            return response()->json(['success' => false, 'message' => 'Bạn không có quyền xóa công thức này'], 403);
+        }
+        $recipe->update(['status' => 'inactive']); 
+
+        return response()->json(['success' => true, 'message' => 'Xóa thành công']);
+    }
+
+    /**
+     * Xóa Blog (Soft delete) - Có xác thực chính chủ
+     * DELETE: /api/auth/profile/blogs/{id}
+     */
+    public function destroyBlog(Request $request, $id)
+    {
+        $user = $request->user();
+
+        $blog = Blog::find($id);
+
+        if (!$blog) {
+            return response()->json(['success' => false, 'message' => 'Không tìm thấy bài viết'], 404);
+        }
+
+        if ($blog->user_id !== $user->id) {
+            return response()->json(['success' => false, 'message' => 'Bạn không có quyền xóa bài viết này'], 403);
+        }
+
+        $blog->update(['status' => 'inactive']); 
+
+        return response()->json(['success' => true, 'message' => 'Xóa bài viết thành công']);
     }
   
 }

@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers\API\V1\Users\Collections;
 
-use App\Http\Controllers\API\V1\BaseCRUDController; // <--- Kế thừa cái này
+use App\Http\Controllers\API\V1\BaseCRUDController;
 use App\Models\Collection;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -12,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 class CollectionController extends BaseCRUDController
 {
     /**
-     * 1. Khai báo Model cho BaseController biết
+     * 1. Khai báo Model
      */
     protected function setModel()
     {
@@ -31,25 +30,26 @@ class CollectionController extends BaseCRUDController
     }
 
     /**
-     * 3. Ghi đè hàm STORE (để xử lý upload ảnh + gán user_id)
+     * 3. Hàm STORE: Tạo bộ sưu tập mới
      */
     public function store(Request $request)
     {
-        // Validate bằng rules đã khai báo ở trên
+        // 1. Lấy User từ Token (Đã qua middleware auth:sanctum)
+        $user = $request->user();
+
+        // 2. Validate
         $validator = Validator::make($request->all(), $this->rules());
         if ($validator->fails()) {
             return $this->sendError('Dữ liệu không hợp lệ', $validator->errors(), 422);
         }
 
-        $user = $request->user() ?? User::find(2);
-
-        // Khởi tạo model
+        // 3. Khởi tạo model
         $collection = new Collection();
-        $collection->fill($request->except('image')); // Fill các trường cơ bản
-        $collection->user_id = $user->id;             // Gán cứng user hiện tại
+        $collection->fill($request->except('image'));
+        $collection->user_id = $user->id; // Gán ID của người đang đăng nhập
         $collection->status = 'active';
 
-        // Xử lý Upload Ảnh
+        // 4. Xử lý Upload Ảnh
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $filename = 'col_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
@@ -63,11 +63,11 @@ class CollectionController extends BaseCRUDController
     }
 
     /**
-     * 4. Ghi đè hàm UPDATE (để check quyền + xử lý ảnh cũ/mới)
+     * 4. Hàm UPDATE: Cập nhật bộ sưu tập
      */
     public function update(Request $request, $id)
     {
-        $user = $request->user() ?? User::find(2);
+        $user = $request->user();
         
         $collection = Collection::find($id);
 
@@ -75,11 +75,12 @@ class CollectionController extends BaseCRUDController
             return $this->sendError('Không tìm thấy bộ sưu tập');
         }
 
-        // Check quyền chính chủ
+        // --- CHECK QUYỀN SỞ HỮU ---
         if ($collection->user_id !== $user->id) {
-            return $this->sendError('Bạn không có quyền chỉnh sửa', [], 403);
+            return $this->sendError('Bạn không có quyền chỉnh sửa bộ sưu tập này', [], 403);
         }
 
+        // Validate
         $validator = Validator::make($request->all(), $this->rules($id));
         if ($validator->fails()) {
             return $this->sendError('Dữ liệu không hợp lệ', $validator->errors(), 422);
@@ -108,11 +109,12 @@ class CollectionController extends BaseCRUDController
     }
 
     /**
-     * 5. Ghi đè hàm DESTROY (để check quyền + xóa mềm)
+     * 5. Hàm DESTROY: Xóa bộ sưu tập (Soft Delete)
      */
     public function destroy($id)
     {
-        $user = request()->user() ?? User::find(2);
+        // Lấy user từ token (Sửa lại cú pháp chuẩn)
+        $user = request()->user();
         
         $collection = Collection::find($id);
 
@@ -120,8 +122,9 @@ class CollectionController extends BaseCRUDController
             return $this->sendError('Không tìm thấy bộ sưu tập');
         }
 
+        // --- CHECK QUYỀN SỞ HỮU ---
         if ($collection->user_id !== $user->id) {
-            return $this->sendError('Bạn không có quyền xóa', [], 403);
+            return $this->sendError('Bạn không có quyền xóa bộ sưu tập này', [], 403);
         }
 
         // Xóa mềm (Soft Delete)
@@ -131,40 +134,49 @@ class CollectionController extends BaseCRUDController
         return $this->sendResponse([], 'Đã xóa bộ sưu tập');
     }
 
-
     /**
-     * 6. XEM CHI TIẾT BỘ SƯU TẬP (KÈM DANH SÁCH MÓN ĂN)
-     * GET: /api/collections/{id}
+     * 6. SHOW: Xem chi tiết (Có thể public hoặc private tùy logic)
      */
     public function show($id)
     {
-        // Lấy collection kèm theo danh sách recipes
+        // Lấy collection kèm theo danh sách recipes active
         $collection = Collection::with(['recipes' => function($query) {
-            $query->wherePivot('status', 'active') // 1. Chỉ lấy món chưa bị xóa mềm
+            $query->wherePivot('status', 'active') 
                   ->select('recipes.id', 'recipes.title', 'recipes.image_path', 'recipes.cooking_time', 'recipes.difficulty_id')
                   ->with('difficulty')
-                  ->withCount('rates')          // 2. Đếm số lượng đánh giá
-                  ->withAvg('rates', 'score');  // 3. Tính điểm trung bình
+                  ->withCount('rates')
+                  ->withAvg('rates', 'score');
         }])->find($id);
 
         if (!$collection) {
             return $this->sendError('Không tìm thấy bộ sưu tập');
         }
 
+        // (Tuỳ chọn) Nếu muốn chỉ chủ nhân mới xem được thì thêm check ở đây
+        // if ($collection->user_id !== request()->user()->id) return 403...
+
         return $this->sendResponse($collection, 'Lấy chi tiết thành công');
     }
 
-
     /**
-     * 8. XÓA CÔNG THỨC KHỎI BỘ SƯU TẬP
-     * POST: /api/collections/{id}/remove-recipe
-     * Body: { recipe_id: 123 }
+     * 7. REMOVE RECIPE: Xóa công thức khỏi bộ sưu tập
      */
     public function removeRecipe(Request $request, $id)
     {
-        $collection = Collection::find($id);
-        if (!$collection) return $this->sendError('Bộ sưu tập không tồn tại');
+        $user = $request->user(); // Lấy user hiện tại
 
+        $collection = Collection::find($id);
+        
+        if (!$collection) {
+            return $this->sendError('Bộ sưu tập không tồn tại');
+        }
+
+        // --- CHECK QUYỀN SỞ HỮU (Quan trọng: Không cho xóa món của người khác) ---
+        if ($collection->user_id !== $user->id) {
+            return $this->sendError('Bạn không có quyền chỉnh sửa bộ sưu tập này', [], 403);
+        }
+
+        // Update bảng trung gian (recipe_collections) set status = inactive
         $collection->recipes()->updateExistingPivot($request->recipe_id, ['status' => 'inactive']);
 
         return $this->sendResponse([], 'Đã xóa công thức khỏi bộ sưu tập');

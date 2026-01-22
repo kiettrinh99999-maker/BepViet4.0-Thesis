@@ -36,21 +36,19 @@ use Illuminate\Support\Facades\DB;
 Route::group(['middleware' => ['api']], function () {
     //Route Admin/login
     Route::post('admin/login', [AuthController::class, 'login_admin']);
-    
     //admin/dashboard
     Route::get('admin/dashboard', [DashboardController::class, 'index']);
 
     //admin/report
     // Đưa 'index' vào trong mảng
     Route::apiResource('admin/report', ReportController::class);
-    //API comment recipe
-    Route::post('comment-recipe', [CommentReicpieController::class,'store']);
-    Route::post('rates', [CommentReicpieController::class, 'rate']);
+
     //member và user
     //API cho recipes
     Route::apiResource('recipes', RecipeController::class);
     //API cho blogs
     Route::apiResource('blogs', BlogController::class);
+    Route::get('categories-blog', [BlogController::class, 'getCategories']);
     //API cho config
     Route::apiResource('config',  ConfigController::class);
     //Lấy dữ liệu vùng miền, độ khó
@@ -68,27 +66,15 @@ Route::group(['middleware' => ['api']], function () {
     //API nguyên liệu
     Route::apiResource('ingredient', IngredientController::class);
 
-    //API cho collections
-    Route::apiResource('collections', CollectionController::class); 
-   
-    
     // QUẢN LÝ DANH MỤC
     //API danh mục vùng miền
     Route::apiResource('regions', ManageRegionController::class);
     //event
     Route::apiResource('events', ManageEventController::class);
-
     //  Danh mục Blog 
     Route::apiResource('blog-categories', ManageBlogCategoryController::class);
-
     // Danh mục Bữa ăn 
     Route::apiResource('recipe-categories', ManageRecipeCategoryController::class);
-    //blog
-    Route::get('blog-categories', [BlogController::class, 'getCategories']);
-    Route::apiResource('blogs', BlogController::class);
-    
-    //collection
-    Route::post('collections/{id}/remove-recipe', [CollectionController::class, 'removeRecipe']); // Xóa món
     //API user login
     Route::prefix('auth')->group(function () {
         Route::post('/register', [AuthController::class, 'register']);
@@ -96,9 +82,20 @@ Route::group(['middleware' => ['api']], function () {
             Route::middleware('auth:sanctum')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::get('/me', [AuthController::class, 'me']);
-             //profile
+             //lấy dữ liệu profile
             Route::get('profile', [ProfileController::class, 'index']);
+            //cập nhật thông tin người dùng profile
             Route::post('profile/update', [ProfileController::class, 'update']);
+            //xóa công thức trong profile
+            Route::delete('profile/recipes/{id}', [ProfileController::class, 'destroyRecipe']);
+            //thêm blog
+            Route::post('add-blog', [BlogController::class, 'store']);
+            //xóa blog trong profile
+            Route::delete('profile/blogs/{id}', [ProfileController::class, 'destroyBlog']);
+            //collection
+            Route::apiResource('collections', CollectionController::class); 
+            Route::post('collections/{id}/remove-recipe', [CollectionController::class, 'removeRecipe']); // Xóa món
+
             // Route::put('/profile', [AuthController::class, 'updateProfile']);
             // Route::post('/change-password', [AuthController::class, 'changePassword']);
     });
