@@ -58,19 +58,15 @@ class RecipeController extends BaseCRUDController
         ->where('status', 'active')
         ->withAvg('rates', 'score')
         ->withCount('rates');
-
         if ($request->filled('region_id')) {
             $query->where('region_id', $request->region_id);
         }
-
         if ($request->filled('event_id')) {
             $query->where('event_id', $request->event_id);
         }
-
         if ($request->filled('difficulty_id')) {
             $query->where('difficulty_id', $request->difficulty_id);
         }
-
         return $this->sendResponse(
             $query->latest()->paginate(12),
             'Lấy danh sách công thức thành công'

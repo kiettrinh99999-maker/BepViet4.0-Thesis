@@ -17,6 +17,8 @@ use App\Http\Controllers\Api\V1\Users\Forums\AnswerController;
 use App\Http\Controllers\API\V1\Users\Follow\FollowController;
 use App\Http\Controllers\API\V1\Users\Ingreient\IngredientController;
 use App\Http\Controllers\API\V1\Users\Profile\ProfileController;
+use App\Http\Controllers\API\V1\Users\CommemntRecipe\CommentReicpieController;
+
 use App\Http\Controllers\API\V1\Users\AuthController;
 use Illuminate\Support\Facades\DB; 
 
@@ -41,7 +43,9 @@ Route::group(['middleware' => ['api']], function () {
     //admin/report
     // Đưa 'index' vào trong mảng
     Route::apiResource('admin/report', ReportController::class);
-
+    //API comment recipe
+    Route::post('comment-recipe', [CommentReicpieController::class,'store']);
+    Route::post('rates', [CommentReicpieController::class, 'rate']);
     //member và user
     //API cho recipes
     Route::apiResource('recipes', RecipeController::class);
@@ -95,5 +99,42 @@ Route::group(['middleware' => ['api']], function () {
             // Route::post('/change-password', [AuthController::class, 'changePassword']);
     });
     });
+
+    // routes/api.php
+// routes/api.php - CHỈ THÊM 1 ROUTE NÀY
+Route::get('/test-simple', function() {
+    $pusher = new \Pusher\Pusher(
+        '44f60a78937823b525c6',
+        'a3b4372a664cc5590bd2', 
+        '2105424',
+        ['cluster' => 'ap1', 'useTLS' => true]
+    );
+    
+    $result = $pusher->trigger('test-channel', 'test-event', ['hello' => 'world']);
+    
+    return response()->json([
+        'success' => true,
+        'result' => $result,
+        'message' => 'Gửi trực tiếp đến Pusher'
+    ]);
+});
+Route::get('/test-broadcast-simple', function() {
+    // Tạo comment test
+    $comment = \App\Models\RecipeComment::create([
+        'recipe_id' => 1,
+        'user_id' => 1,
+        'content' => 'Test realtime comment'
+    ]);
+    
+    $comment->load('user.profile');
+    
+    // Gọi broadcast
+    broadcast(new \App\Events\NewComment($comment));
+    
+    return response()->json([
+        'success' => true,
+        'comment_id' => $comment->id
+    ]);
+});
 });
 
