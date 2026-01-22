@@ -55,6 +55,8 @@ class RecipeController extends BaseCRUDController
             'region:id,name',
             'difficulty:id,name',
             'event:id,name',
+            'ingredients'
+            
         ])
         ->where('status', 'active')
         ->withAvg('rates', 'score')
@@ -105,6 +107,7 @@ class RecipeController extends BaseCRUDController
             'region:id,name',
             'difficulty:id,name',
             'event:id,name',
+            'ingredients'
         ])
         ->where('status', 'pending');
         if ($request->filled('region_id')) {
