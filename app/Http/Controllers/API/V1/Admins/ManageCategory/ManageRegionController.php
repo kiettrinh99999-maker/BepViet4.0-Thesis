@@ -26,14 +26,11 @@ class ManageRegionController extends BaseCRUDController
         $request = request();
         $query = $this->model::query();
 
-        // --- ĐÃ BỎ ĐOẠN IF KEYWORD TẠI ĐÂY ---
-
-        // Vẫn giữ lại lọc theo status (để nếu sau này cần lọc Active/Inactive)
+  
         if ($request->has('status') && $request->status) {
             $query->where('status', $request->status);
         }
 
-        // Sắp xếp mới nhất lên đầu
         $query->orderBy('created_at', 'desc');
         
         $data = $query->get();

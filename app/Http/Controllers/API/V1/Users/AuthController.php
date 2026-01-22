@@ -95,43 +95,36 @@ class AuthController extends BaseCRUDController
     } catch (\Exception $e) {
         return $this->sendError('Đăng ký thất bại: ' . $e->getMessage(), [], 500);
     }
-}
+    }
     /**
      * Đăng nhập
      */
     public function login(Request $request)
-{
+    {
     $validator = Validator::make($request->all(), [
         'login' => 'required|string',
         'password' => 'required|string',
     ]);
-
     if ($validator->fails()) {
         return $this->sendError('Lỗi xác thực', $validator->errors(), 422);
     }
-
     $login = $request->input('login');
     $password = $request->input('password');
-
     // Tìm user bằng email hoặc username (tự động nhận diện)
     $user = User::where(function ($query) use ($login) {
         $query->where('email', $login)
               ->orWhere('username', $login);
     })->first();
-
     // Kiểm tra thông tin đăng nhập
     if (!$user || !Hash::check($password, $user->password)) {
         return $this->sendError('Thông tin đăng nhập không đúng', [], 401);
     }
-
     // Kiểm tra trạng thái tài khoản
     if ($user->status !== 'active') {
         return $this->sendError('Tài khoản chưa được kích hoạt', [], 403);
     }
-
     // Load profile
     $user->load('profile');
-
     // Tạo token
     $token = null;
     if (method_exists($user, 'createToken')) {
@@ -146,7 +139,6 @@ class AuthController extends BaseCRUDController
     }
     // Cập nhật last login
     $user->update(['updated_at' => now()]);
-
     $responseData = [
         'user' => [
             'id' => $user->id,
@@ -163,15 +155,12 @@ class AuthController extends BaseCRUDController
         ],
         'message' => 'Đăng nhập thành công!'
     ];
-
     if ($token) {
         $responseData['access_token'] = $token;
         $responseData['token_type'] = 'Bearer';
     }
-
     return $this->sendResponse($responseData, 'Đăng nhập thành công!');
-}
-
+    }
     /**
      * Đăng xuất
      */

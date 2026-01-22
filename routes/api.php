@@ -66,9 +66,7 @@ Route::group(['middleware' => ['api']], function () {
 
     //API cho collections
     Route::apiResource('collections', CollectionController::class); 
-    //profile
-    Route::get('profile', [ProfileController::class, 'index']);
-    Route::post('profile/update', [ProfileController::class, 'update']);
+   
     
     // QUẢN LÝ DANH MỤC
     //API danh mục vùng miền
@@ -81,6 +79,9 @@ Route::group(['middleware' => ['api']], function () {
 
     // Danh mục Bữa ăn 
     Route::apiResource('recipe-categories', ManageRecipeCategoryController::class);
+    //blog
+    Route::get('blog-categories', [BlogController::class, 'getCategories']);
+    Route::apiResource('blogs', BlogController::class);
     
     //collection
     Route::post('collections/{id}/remove-recipe', [CollectionController::class, 'removeRecipe']); // Xóa món
@@ -91,6 +92,9 @@ Route::group(['middleware' => ['api']], function () {
             Route::middleware('auth:sanctum')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::get('/me', [AuthController::class, 'me']);
+             //profile
+            Route::get('profile', [ProfileController::class, 'index']);
+            Route::post('profile/update', [ProfileController::class, 'update']);
             // Route::put('/profile', [AuthController::class, 'updateProfile']);
             // Route::post('/change-password', [AuthController::class, 'changePassword']);
     });
