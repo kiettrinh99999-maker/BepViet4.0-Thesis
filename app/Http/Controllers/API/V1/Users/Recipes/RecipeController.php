@@ -89,6 +89,43 @@ class RecipeController extends BaseCRUDController
             'Lấy danh sách công thức thành công'
         );
     }
+   public function index_pending()
+    {
+        $request = request();
+
+        $query = Recipe::with([
+            'user:id,username',
+            'region:id,name',
+            'difficulty:id,name',
+            'event:id,name',
+        ])
+        ->where('status', 'pending');
+
+        
+        if ($request->filled('region_id')) {
+            $query->where('region_id', $request->region_id);
+        }
+        if ($request->filled('event_id')) {
+            $query->where('event_id', $request->event_id);
+        }
+        if ($request->filled('difficulty_id')) {
+            $query->where('difficulty_id', $request->difficulty_id);
+        }
+        if ($request->filled('min_time')) {
+            $query->where('cooking_time', '>=', $request->min_time);
+        }
+        if ($request->filled('max_time')) {
+            $query->where('cooking_time', '<=', $request->max_time);
+        }
+        if ($request->filled('mock_user_region') && !$request->filled('region_id')) {
+            $query->orderByRaw('CASE WHEN region_id = ? THEN 0 ELSE 1 END', [$request->mock_user_region]);
+        }
+
+        return $this->sendResponse(
+            $query->latest()->paginate(12),
+            'Lấy danh sách công thức thành công'
+        );
+    }
 
     /**
      * Chi tiết công thức
@@ -256,6 +293,37 @@ class RecipeController extends BaseCRUDController
             }
             
             return $this->sendError('Lỗi hệ thống', ['error' => $e->getMessage()], 500);
+        }
+    }
+
+
+    //
+    /**
+     * Cập nhật trạng thái công thức (Duyệt/Từ chối/Ẩn)
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $validator = Validator::make($request->all(), [
+            'status' => 'required|string|in:active,pending,rejected,inactive',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError('Dữ liệu không hợp lệ', $validator->errors(), 422);
+        }
+        $recipe = Recipe::find($id);
+        if (!$recipe) {
+            return $this->sendError('Không tìm thấy công thức', [], 404);
+        }
+        try {
+            $oldStatus = $recipe->status;
+            $recipe->status = $request->status;
+            $recipe->save();
+            return $this->sendResponse(
+                $recipe, 
+                "Cập nhật trạng thái thành công từ '{$oldStatus}' sang '{$recipe->status}'"
+            );
+        } catch (Exception $e) {
+            return $this->sendError('Lỗi hệ thống khi cập nhật trạng thái', ['error' => $e->getMessage()], 500);
         }
     }
 }

@@ -47,6 +47,10 @@ Route::group(['middleware' => ['api']], function () {
     Route::post('comment-recipe', [CommentReicpieController::class,'store']);
     Route::post('rates', [CommentReicpieController::class, 'rate']);
     //member và user
+    Route::get('recipes/pending', [RecipeController::class, 'index_pending']);
+    //APi cập nhật trạng thái duyệt
+    Route::patch('recipes/{id}/status', [RecipeController::class, 'updateStatus']);
+
     //API cho recipes
     Route::apiResource('recipes', RecipeController::class);
     //API cho blogs
