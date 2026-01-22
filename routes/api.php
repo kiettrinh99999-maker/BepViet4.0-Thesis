@@ -6,6 +6,7 @@ use App\Http\Controllers\API\V1\Admins\ManageCategory\ManageBlogCategoryControll
 use App\Http\Controllers\API\V1\Admins\ManageCategory\ManageEventController;
 use App\Http\Controllers\API\V1\Admins\ManageCategory\ManageRecipeCategoryController;
 use App\Http\Controllers\API\V1\Admins\ManageCategory\ManageRegionController;
+use App\Http\Controllers\API\V1\Admins\ManageUserController;
 use App\Http\Controllers\Api\V1\Admins\ReportController;
 use App\Http\Controllers\API\V1\Users\Blogs\BlogController;
 use App\Http\Controllers\API\V1\Users\Collections\CollectionController;
@@ -95,7 +96,8 @@ Route::group(['middleware' => ['api']], function () {
             //collection
             Route::apiResource('collections', CollectionController::class); 
             Route::post('collections/{id}/remove-recipe', [CollectionController::class, 'removeRecipe']); // Xóa món
-
+            Route::get('manage-users', [ManageUserController::class, 'index']);
+            Route::patch('users/{id}/toggle-status', [ManageUserController::class, 'toggleStatus']);
             // Route::put('/profile', [AuthController::class, 'updateProfile']);
             // Route::post('/change-password', [AuthController::class, 'changePassword']);
     });
