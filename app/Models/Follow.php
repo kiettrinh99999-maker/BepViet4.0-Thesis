@@ -25,8 +25,8 @@ use Illuminate\Database\Eloquent\Model;
 class Follow extends Model
 {
 	protected $table = 'follows';
-	public $incrementing = false;
-
+	protected $primaryKey = null;
+    public $incrementing = false;
 	protected $casts = [
 		'follower_id' => 'int',
 		'following_id' => 'int'
