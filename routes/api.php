@@ -1,7 +1,10 @@
 <?php
-use App\Http\Controllers\Api\V1\Admins\DashboardController;
+
 use App\Http\Controllers\Api\V1\Admins\Config\ConfigController;
+use App\Http\Controllers\Api\V1\Admins\DashboardController;
 use App\Http\Controllers\Api\V1\Admins\ReportController;
+use App\Http\Controllers\API\V1\Users\Blogs\BlogController;
+use App\Http\Controllers\API\V1\Users\Collections\CollectionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\Users\Recipes\RecipeController;
@@ -9,6 +12,7 @@ use App\Http\Controllers\Api\V1\Users\Forums\QuestionController;
 use App\Http\Controllers\Api\V1\Users\Forums\AnswerController;
 use App\Http\Controllers\API\V1\Users\Follow\FollowController;
 use App\Http\Controllers\API\V1\Users\Ingreient\IngredientController;
+use App\Http\Controllers\API\V1\Users\Profile\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,14 +27,16 @@ use App\Http\Controllers\API\V1\Users\Ingreient\IngredientController;
 Route::group(['middleware' => ['api']], function () {
     //admin/dashboard
     Route::get('admin/dashboard', [DashboardController::class, 'index']);
-
-
     //admin/report
     // Đưa 'index' vào trong mảng
     Route::apiResource('admin/report', ReportController::class);
 
     //member và user
+    //API cho recipes
     Route::apiResource('recipes', RecipeController::class);
+    //API cho blogs
+    Route::apiResource('blogs', BlogController::class);
+    //API cho config
     Route::apiResource('config',  ConfigController::class);
     //Lấy dữ liệu vùng miền, độ khó
     Route::get('get-event-region',[ConfigController::class,'get_region_event_dif']);
@@ -47,4 +53,14 @@ Route::group(['middleware' => ['api']], function () {
     //API nguyên liệu
     Route::apiResource('ingredient', IngredientController::class);
 
+    //API cho collections
+    Route::apiResource('collections', CollectionController::class); 
+    //profile
+    Route::get('profile', [ProfileController::class, 'index']);
+    Route::post('profile/update', [ProfileController::class, 'update']);
+    
+
+    //collection
+    Route::post('collections/{id}/remove-recipe', [CollectionController::class, 'removeRecipe']); // Xóa món
 });
+
