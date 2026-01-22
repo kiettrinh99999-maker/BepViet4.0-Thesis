@@ -13,6 +13,9 @@ use App\Http\Controllers\Api\V1\Users\Forums\AnswerController;
 use App\Http\Controllers\API\V1\Users\Follow\FollowController;
 use App\Http\Controllers\API\V1\Users\Ingreient\IngredientController;
 use App\Http\Controllers\API\V1\Users\Profile\ProfileController;
+use App\Http\Controllers\API\V1\Users\AuthController;
+use Illuminate\Support\Facades\DB; 
+
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +30,7 @@ use App\Http\Controllers\API\V1\Users\Profile\ProfileController;
 Route::group(['middleware' => ['api']], function () {
     //admin/dashboard
     Route::get('admin/dashboard', [DashboardController::class, 'index']);
+
     //admin/report
     // Đưa 'index' vào trong mảng
     Route::apiResource('admin/report', ReportController::class);
@@ -62,5 +66,16 @@ Route::group(['middleware' => ['api']], function () {
 
     //collection
     Route::post('collections/{id}/remove-recipe', [CollectionController::class, 'removeRecipe']); // Xóa món
+    //API user login
+    Route::prefix('auth')->group(function () {
+        Route::post('/register', [AuthController::class, 'register']);
+        Route::post('/login', [AuthController::class, 'login']);
+            Route::middleware('auth:sanctum')->group(function () {
+            Route::post('/logout', [AuthController::class, 'logout']);
+            Route::get('/me', [AuthController::class, 'me']);
+            Route::put('/profile', [AuthController::class, 'updateProfile']);
+            Route::post('/change-password', [AuthController::class, 'changePassword']);
+    });
+    });
 });
 
