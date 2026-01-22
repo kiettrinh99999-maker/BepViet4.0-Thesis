@@ -38,8 +38,7 @@ class AuthController extends BaseCRUDController
     /**
      * Đăng ký tài khoản mới
      */
-   public function register(Request $request)
-{
+   public function register(Request $request){
     $validator = Validator::make($request->all(), $this->rules());
     
     if ($validator->fails()) {
@@ -303,4 +302,119 @@ class AuthController extends BaseCRUDController
 
         return $this->sendResponse([], 'Đổi mật khẩu thành công!');
     }
+
+/**
+ * Đăng nhập admin với token expiration 8 tiếng
+ */
+    public function login_admin(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'login' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->sendError('Lỗi xác thực', $validator->errors(), 422);
+        }
+
+        $login = $request->input('login');
+        $password = $request->input('password');
+        $user = User::where(function ($query) use ($login) {
+            $query->where('email', $login)
+                ->orWhere('username', $login);
+        })->first();
+        if (!$user || !Hash::check($password, $user->password)) {
+            return $this->sendError('Thông tin đăng nhập không đúng', [], 401);
+        }
+        if ($user->status !== 'active') {
+            return $this->sendError('Tài khoản chưa được kích hoạt', [], 403);
+        }
+        if ($user->role !== 'admin') {
+            return $this->sendError('Không có quyền truy cập admin', [], 403);
+        }
+        $user->load('profile');
+        $token = null;
+        if (method_exists($user, 'createToken')) {
+            $expiresAt = now()->addHours(1);
+            $token = $user->createToken(
+                'admin_auth_token', 
+                ['*'], 
+                $expiresAt
+            )->plainTextToken;
+        }
+        $user->update(['updated_at' => now()]);
+        $responseData = [
+            'user' => [
+                'id' => $user->id,
+                'username' => $user->username,
+                'email' => $user->email,
+                'role' => $user->role,
+                'status' => $user->status,
+                'profile' => $user->profile ? [
+                    'name' => $user->profile->name,
+                    'phone' => $user->profile->phone,
+                    'image_path' => $user->profile->image_path,
+                    'region_id' => $user->profile->region_id,
+                ] : null
+            ],
+            'message' => 'Đăng nhập admin thành công!',
+            'expires_in' => 8 * 60 * 60,
+            'expires_at' => $expiresAt->toISOString()
+        ];
+
+        if ($token) {
+            $responseData['access_token'] = $token;
+            $responseData['token_type'] = 'Bearer';
+        }
+
+        return $this->sendResponse($responseData, 'Đăng nhập admin thành công!');
+    }
+
+/**
+ * Middleware kiểm tra token admin
+ */
+public function checkAdminToken(Request $request)
+{
+    $user = $request->user();
+    
+    if (!$user) {
+        return $this->sendError('Không tìm thấy thông tin người dùng', [], 401);
+    }
+    if ($user->role !== 'admin') {
+        return $this->sendError('Không có quyền truy cập', [], 403);
+    }
+    $token = $user->currentAccessToken();
+    if ($token->expires_at && $token->expires_at->isPast()) {
+        $token->delete();
+        return $this->sendError('Token admin đã hết hạn', [], 401);
+    }
+    $remainingTime = null;
+    if ($token->expires_at) {
+        $remainingSeconds = now()->diffInSeconds($token->expires_at, false);
+        $remainingTime = $remainingSeconds > 0 ? $remainingSeconds : 0;
+    }
+    
+    $user->load('profile');
+    
+    return $this->sendResponse([
+        'user' => [
+            'id' => $user->id,
+            'username' => $user->username,
+            'email' => $user->email,
+            'role' => $user->role,
+            'status' => $user->status,
+            'profile' => $user->profile ? [
+                'name' => $user->profile->name,
+                'phone' => $user->profile->phone,
+                'image_path' => $user->profile->image_path,
+                'region_id' => $user->profile->region_id,
+            ] : null
+        ],
+        'token_info' => [
+            'expires_at' => $token->expires_at ? $token->expires_at->toISOString() : null,
+            'remaining_seconds' => $remainingTime,
+            'remaining_hours' => $remainingTime ? round($remainingTime / 3600, 2) : null
+        ]
+    ], 'Token admin hợp lệ');
+}
 }

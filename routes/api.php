@@ -28,6 +28,9 @@ use Illuminate\Support\Facades\DB;
 |
 */
 Route::group(['middleware' => ['api']], function () {
+    //Route Admin/login
+    Route::post('admin/login', [AuthController::class, 'login_admin']);
+    
     //admin/dashboard
     Route::get('admin/dashboard', [DashboardController::class, 'index']);
 
