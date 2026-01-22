@@ -5,8 +5,6 @@ namespace App\Http\Controllers\API\V1\Users\Recipes;
 use App\Models\Recipe;
 use App\Models\Step;
 use App\Http\Controllers\API\V1\BaseCRUDController;
-use App\Models\Recipe;
-use App\Models\Step;
 use App\Models\User;
 use App\Models\Follow;
 use Illuminate\Http\Request;

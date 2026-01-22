@@ -104,7 +104,7 @@ class AuthController extends BaseCRUDController
     public function login(Request $request)
 {
     $validator = Validator::make($request->all(), [
-        'login' => 'required|string', // Field chung cho cả email và username
+        'login' => 'required|string',
         'password' => 'required|string',
     ]);
 
