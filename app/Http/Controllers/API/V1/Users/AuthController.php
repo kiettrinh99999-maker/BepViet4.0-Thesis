@@ -102,71 +102,71 @@ class AuthController extends BaseCRUDController
      * Đăng nhập
      */
     public function login(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required_without:username|email',
-            'username' => 'required_without:email|string',
-            'password' => 'required|string',
-        ]);
+{
+    $validator = Validator::make($request->all(), [
+        'login' => 'required|string', // Field chung cho cả email và username
+        'password' => 'required|string',
+    ]);
 
-        if ($validator->fails()) {
-            return $this->sendError('Lỗi xác thực', $validator->errors(), 422);
-        }
-
-        // Tìm user bằng email hoặc username
-        $user = null;
-        if ($request->filled('email')) {
-            $user = User::where('email', $request->email)->first();
-        } elseif ($request->filled('username')) {
-            $user = User::where('username', $request->username)->first();
-        }
-
-        // Kiểm tra thông tin đăng nhập
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return $this->sendError('Thông tin đăng nhập không đúng', [], 401);
-        }
-
-        // Kiểm tra trạng thái tài khoản
-        if ($user->status !== 'active') {
-            return $this->sendError('Tài khoản chưa được kích hoạt', [], 403);
-        }
-
-        // Load profile
-        $user->load('profile');
-
-        // Tạo token
-        $token = null;
-        if (method_exists($user, 'createToken')) {
-            $token = $user->createToken('auth_token')->plainTextToken;
-        }
-
-        // Cập nhật last login
-        $user->update(['updated_at' => now()]);
-
-        $responseData = [
-            'user' => [
-                'id' => $user->id,
-                'username' => $user->username,
-                'email' => $user->email,
-                'role' => $user->role,
-                'status' => $user->status,
-                'profile' => $user->profile ? [
-                    'name' => $user->profile->name,
-                    'phone' => $user->profile->phone,
-                    'image_path' => $user->profile->image_path,
-                    'region_id' => $user->profile->region_id,
-                ] : null
-            ],
-            'message' => 'Đăng nhập thành công!'
-        ];
-
-        if ($token) {
-            $responseData['access_token'] = $token;
-            $responseData['token_type'] = 'Bearer';
-        }
-
-        return $this->sendResponse($responseData, 'Đăng nhập thành công!');
+    if ($validator->fails()) {
+        return $this->sendError('Lỗi xác thực', $validator->errors(), 422);
     }
+
+    $login = $request->input('login');
+    $password = $request->input('password');
+
+    // Tìm user bằng email hoặc username (tự động nhận diện)
+    $user = User::where(function ($query) use ($login) {
+        $query->where('email', $login)
+              ->orWhere('username', $login);
+    })->first();
+
+    // Kiểm tra thông tin đăng nhập
+    if (!$user || !Hash::check($password, $user->password)) {
+        return $this->sendError('Thông tin đăng nhập không đúng', [], 401);
+    }
+
+    // Kiểm tra trạng thái tài khoản
+    if ($user->status !== 'active') {
+        return $this->sendError('Tài khoản chưa được kích hoạt', [], 403);
+    }
+
+    // Load profile
+    $user->load('profile');
+
+    // Tạo token
+    $token = null;
+    if (method_exists($user, 'createToken')) {
+        $token = $user->createToken('auth_token')->plainTextToken;
+    }
+
+    // Cập nhật last login
+    $user->update(['updated_at' => now()]);
+
+    $responseData = [
+        'user' => [
+            'id' => $user->id,
+            'username' => $user->username,
+            'email' => $user->email,
+            'role' => $user->role,
+            'status' => $user->status,
+            'profile' => $user->profile ? [
+                'name' => $user->profile->name,
+                'phone' => $user->profile->phone,
+                'image_path' => $user->profile->image_path,
+                'region_id' => $user->profile->region_id,
+            ] : null
+        ],
+        'message' => 'Đăng nhập thành công!'
+    ];
+
+    if ($token) {
+        $responseData['access_token'] = $token;
+        $responseData['token_type'] = 'Bearer';
+    }
+
+    return $this->sendResponse($responseData, 'Đăng nhập thành công!');
+}
 
     /**
      * Đăng xuất
