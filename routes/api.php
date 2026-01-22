@@ -2,6 +2,10 @@
 
 use App\Http\Controllers\Api\V1\Admins\Config\ConfigController;
 use App\Http\Controllers\Api\V1\Admins\DashboardController;
+use App\Http\Controllers\API\V1\Admins\ManageCategory\ManageBlogCategoryController;
+use App\Http\Controllers\API\V1\Admins\ManageCategory\ManageEventController;
+use App\Http\Controllers\API\V1\Admins\ManageCategory\ManageRecipeCategoryController;
+use App\Http\Controllers\API\V1\Admins\ManageCategory\ManageRegionController;
 use App\Http\Controllers\Api\V1\Admins\ReportController;
 use App\Http\Controllers\API\V1\Users\Blogs\BlogController;
 use App\Http\Controllers\API\V1\Users\Collections\CollectionController;
@@ -63,7 +67,18 @@ Route::group(['middleware' => ['api']], function () {
     Route::get('profile', [ProfileController::class, 'index']);
     Route::post('profile/update', [ProfileController::class, 'update']);
     
+    // QUẢN LÝ DANH MỤC
+    //API danh mục vùng miền
+    Route::apiResource('regions', ManageRegionController::class);
+    //event
+    Route::apiResource('events', ManageEventController::class);
 
+    //  Danh mục Blog 
+    Route::apiResource('blog-categories', ManageBlogCategoryController::class);
+
+    // Danh mục Bữa ăn 
+    Route::apiResource('recipe-categories', ManageRecipeCategoryController::class);
+    
     //collection
     Route::post('collections/{id}/remove-recipe', [CollectionController::class, 'removeRecipe']); // Xóa món
     //API user login
