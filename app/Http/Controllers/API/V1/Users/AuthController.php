@@ -23,7 +23,6 @@ class AuthController extends BaseCRUDController
             'username' => 'required|string|max:255|unique:users,username,' . $id,
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
             'password' => 'required|string|min:6',
-            'name' => 'required|string|max:255',
             'phone' => 'nullable|string|max:20',
             'region_id' => 'nullable|exists:regions,id',
         ];
@@ -55,7 +54,7 @@ class AuthController extends BaseCRUDController
         ]);
         $profile = new Profile();
         $profile->user_id = $user->id;
-        $profile->name = $request->name;
+        $profile->name = $request->name||" ";
         $profile->phone = $request->phone;
         $profile->status = 'active';
         $profile->image_path = 'null';
@@ -136,9 +135,15 @@ class AuthController extends BaseCRUDController
     // Tạo token
     $token = null;
     if (method_exists($user, 'createToken')) {
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $tokenResult = $user->createToken(
+            name: 'auth_token',
+            expiresAt: now()->addMinutes(config('sanctum.expiration', 10080))
+        );
+        $tokenResult->accessToken->update([
+            'expires_at' => now()->addMinutes(config('sanctum.expiration', 10080))
+        ]);
+        $token = $tokenResult->plainTextToken;
     }
-
     // Cập nhật last login
     $user->update(['updated_at' => now()]);
 
