@@ -75,8 +75,7 @@ Route::group(['middleware' => ['api']], function () {
     //API cho collections
     Route::apiResource('collections', CollectionController::class); 
     //profile
-    Route::get('profile', [ProfileController::class, 'index']);
-    Route::post('profile/update', [ProfileController::class, 'update']);
+
     
     // QUẢN LÝ DANH MỤC
     //API danh mục vùng miền
@@ -101,6 +100,8 @@ Route::group(['middleware' => ['api']], function () {
             Route::get('/me', [AuthController::class, 'me']);
             // Route::put('/profile', [AuthController::class, 'updateProfile']);
             // Route::post('/change-password', [AuthController::class, 'changePassword']);
+                Route::get('profile', [ProfileController::class, 'index']);
+            Route::post('profile/update', [ProfileController::class, 'update']);
     });
     });
 
